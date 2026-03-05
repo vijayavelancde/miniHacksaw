@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::body})">
+
+<body>
+
+<div class="dashboard-header">
+
+    <div class="header-left">
+        <h2>Security Dashboard</h2>
+    </div>
+
+    <div class="header-right">
+
+        <form method="get"
+              th:action="@{/}"
+              class="product-selector">
+
+            <select name="productId"
+                    class="app-dropdown"
+                    onchange="this.form.submit()">
+
+                <!-- Default Option -->
+                <option value=""
+                        th:selected="${selectedProductId == null or selectedProductId == ''}">
+                    Select Product
+                </option>
+
+                <!-- Products -->
+                <option th:each="p : ${products}"
+                        th:value="${p.productId}"
+                        th:text="${p.name}"
+                        th:selected="${selectedProductId == p.productId}">
+                </option>
+
+            </select>
+
+        </form>
+
+        <!-- View Details (only if product selected) -->
+        <a th:if="${selectedProductId != null and selectedProductId != ''}"
+           th:href="@{'/products/' + ${selectedProductId} + '/vulnerabilities'}"
+           class="view-details-btn">
+            View Details
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- ===== DASHBOARD CONTENT ===== -->
+
+<div th:if="${selectedProductId == null or selectedProductId == ''}"
+     class="card summary-card"
+     style="text-align:center; padding:30px;">
+    <h3>Please select a product to view dashboard metrics.</h3>
+</div>
+
+
+<div th:if="${selectedProductId != null and selectedProductId != ''}">
+
+    <div class="card summary-card">
+        <h3>Total Violations</h3>
+        <p class="metric"
+           th:text="${totalVulnerabilities != null ? totalVulnerabilities : 0}">
+        </p>
+    </div>
+
+    <div class="card summary-card">
+        <h3>Blocking Violations</h3>
+        <p class="metric danger"
+           th:text="${criticalCount != null ? criticalCount : 0}">
+        </p>
+    </div>
+
+    <div class="card summary-card">
+        <h3>Build Status</h3>
+        <p class="metric"
+           th:classappend="${criticalCount != null and criticalCount > 0 ? 'danger' : 'safe'}"
+           th:text="${criticalCount != null and criticalCount > 0 ? 'BLOCKED' : 'SAFE'}">
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::content})">
+
+<div th:fragment="content">
+
+    <!-- ===== Page Header ===== -->
+    <div class="page-header-wrapper">
+        <h2>Security Misconfigurations</h2>
+
+        <form method="get"
+              th:action="@{/misconfigurations}"
+              class="filter-form">
+
+            <select name="productId"
+                    class="app-dropdown"
+                    required
+                    onchange="this.form.submit()">
+
+                <option value="" disabled
+                        th:selected="${selectedProduct == null}">
+                    Select Product
+                </option>
+
+                <option th:each="product : ${products}"
+                        th:value="${product.productId}"
+                        th:text="${product.name}"
+                        th:selected="${selectedProduct != null 
+                                     and selectedProduct.productId == product.productId}">
+                </option>
+
+            </select>
+        </form>
+    </div>
+	
+	<!-- ===== Severity Summary (Horizontal) ===== -->
+	<div th:if="${selectedProduct != null}"
+	     style="display:flex; 
+	            gap:20px; 
+	            margin-bottom:30px; 
+	            flex-wrap:nowrap;">
+
+	    <div class="card summary-card"
+	         style="flex:1; min-width:0; text-align:center;">
+	        <h3>Critical</h3>
+	        <div class="metric danger"
+	             th:text="${criticalCount}">0</div>
+	    </div>
+
+	    <div class="card summary-card"
+	         style="flex:1; min-width:0; text-align:center;">
+	        <h3>High</h3>
+	        <div class="metric"
+	             style="color:#ea580c;"
+	             th:text="${highCount}">0</div>
+	    </div>
+
+	    <div class="card summary-card"
+	         style="flex:1; min-width:0; text-align:center;">
+	        <h3>Medium</h3>
+	        <div class="metric"
+	             style="color:#d97706;"
+	             th:text="${mediumCount}">0</div>
+	    </div>
+
+	    <div class="card summary-card"
+	         style="flex:1; min-width:0; text-align:center;">
+	        <h3>Low</h3>
+	        <div class="metric safe"
+	             th:text="${lowCount}">0</div>
+	    </div>
+
+	</div>
+    <!-- ===== No Product Selected ===== -->
+    <div th:if="${selectedProduct == null}"
+         class="card empty-state">
+        Please select a product to view misconfigurations.
+    </div>
+
+    <!-- ===== No Issues ===== -->
+    <div th:if="${selectedProduct != null and #lists.isEmpty(misconfigurations)}"
+         class="card empty-state">
+        No misconfigurations detected for this product.
+    </div>
+
+    <!-- ===== Issues Table ===== -->
+    <div th:if="${selectedProduct != null 
+                 and misconfigurations != null 
+                 and !#lists.isEmpty(misconfigurations)}"
+         class="card">
+
+        <table class="styled-table">
+
+            <thead>
+                <tr>
+                    <th>Issue</th>
+                    <th>Severity</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr th:each="issue : ${misconfigurations}"
+                    th:class="'severity-row ' + ${#strings.toLowerCase(issue.severity)}">
+
+                    <td style="font-weight:600;"
+                        th:text="${issue.title}">
+                    </td>
+
+                    <td>
+                        <span class="severity-badge"
+                              th:classappend="' ' + ${#strings.toLowerCase(issue.severity)}"
+                              th:text="${issue.severity}">
+                        </span>
+                    </td>
+
+                    <td th:text="${issue.description}"></td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</html>

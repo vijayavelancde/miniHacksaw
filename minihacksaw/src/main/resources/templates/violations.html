@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::body})">
+
+<body>
+
+<div class="page-header-wrapper">
+
+    <h2>Code Violations</h2>
+
+    <form method="get"
+          th:action="@{/violations}"
+          class="filter-form">
+
+        <select name="productId"
+                class="app-dropdown"
+                onchange="this.form.submit()">
+
+            <!-- Always show default option -->
+            <option value=""
+                    th:selected="${selectedProduct == null or selectedProduct == ''}">
+                Select Product
+            </option>
+
+            <!-- Real products -->
+            <option th:each="p : ${products}"
+                    th:value="${p.productId}"
+                    th:text="${p.name}"
+                    th:selected="${selectedProduct == p.productId}">
+            </option>
+
+        </select>
+
+    </form>
+
+</div>
+
+<div class="card">
+
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Severity</th>
+            <th>Description</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <!-- No Products -->
+        <tr th:if="${#lists.isEmpty(products)}">
+            <td colspan="4" style="text-align:center; padding:20px;">
+                No products available. Please add a product first.
+            </td>
+        </tr>
+
+        <!-- No Product Selected -->
+        <tr th:if="${!#lists.isEmpty(products) and (selectedProduct == null or selectedProduct == '')}">
+            <td colspan="4" style="text-align:center; padding:20px;">
+                Select a product to view violations.
+            </td>
+        </tr>
+
+        <!-- No Violations -->
+        <tr th:if="${selectedProduct != null and selectedProduct != '' and #lists.isEmpty(violations)}">
+            <td colspan="4" style="text-align:center; padding:20px;">
+                No violations found for selected product.
+            </td>
+        </tr>
+
+        <!-- Show Violations -->
+        <tr th:each="v : ${violations}">
+            <td th:text="${v.title}"></td>
+            <td>
+                <span class="badge"
+                      th:classappend="' ' + ${v.severity.toLowerCase()}"
+                      th:text="${v.severity}">
+                </span>
+            </td>
+            <td th:text="${v.description}"></td>
+            <td th:text="${v.status}"></td>
+        </tr>
+
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

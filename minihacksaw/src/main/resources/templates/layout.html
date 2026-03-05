@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(content)">
+
+<head>
+    <title>Mini Hacksaw Security Dashboard</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: #0b1b34;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding-left: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 240px;
+            height: calc(100vh - 70px);
+            background-color: #1e293b;
+            padding: 25px 18px;
+            color: white;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #cbd5e1;
+            text-decoration: none;
+            margin-bottom: 22px;
+            font-size: 16px;
+            transition: 0.2s ease;
+            padding: 10px 12px;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .sidebar a:hover {
+            color: white;
+        }
+
+        .sidebar a.active {
+            background-color: #0b1b34;
+            color: white !important;
+        }
+
+        .sidebar a.active::before {
+            content: "";
+            position: absolute;
+            left: -18px;
+            top: 0;
+            width: 5px;
+            height: 100%;
+            background-color: #38bdf8;
+            border-radius: 3px;
+        }
+
+        .content {
+            margin-left: 240px;
+            margin-top: 70px;
+            padding: 35px;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+		
+		/* ===== PRODUCT TABLE POLISH ===== */
+		.product-table th {
+		    font-size: 14px;
+		    font-weight: 600;
+		    letter-spacing: 0.3px;
+		}
+
+		.product-table td {
+		    font-size: 14px;
+		    vertical-align: middle;
+		}
+
+		/* Empty state */
+		.empty-state {
+		    text-align: center;
+		    padding: 40px;
+		    color: #64748b;
+		    font-size: 15px;
+		}
+
+		/* Status badges */
+		.status-badge {
+		    padding: 6px 12px;
+		    border-radius: 20px;
+		    font-size: 12px;
+		    font-weight: 600;
+		    display: inline-block;
+		}
+
+		.status-safe {
+		    background-color: #dcfce7;
+		    color: #166534;
+		}
+
+		.status-failed {
+		    background-color: #fee2e2;
+		    color: #991b1b;
+		}
+
+		.status-scanning {
+		    background-color: #dbeafe;
+		    color: #1e40af;
+		}
+
+		.status-pending {
+		    background-color: #fef9c3;
+		    color: #854d0e;
+		}
+		
+		/* Header alignment */
+		.page-header {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    margin-bottom: 25px;
+		}
+
+		.header-actions {
+		    display: flex;
+		    gap: 12px;
+		}
+
+		/* Delete button style */
+		.danger-btn {
+		    background-color: #b91c1c;
+		}
+
+		.danger-btn:hover {
+		    background-color: #991b1b;
+		}
+
+		/* Edit icon button */
+		.icon-btn {
+		    background-color: #0b1b34;
+		    color: white;
+		    padding: 6px 10px;
+		    border-radius: 6px;
+		    text-decoration: none;
+		    display: inline-block;
+		}
+
+		.icon-btn:hover {
+		    background-color: #132a50;
+		}
+
+		/* Table polish */
+		.product-table th {
+		    font-weight: 600;
+		    font-size: 14px;
+		}
+
+		.product-table td {
+		    font-size: 14px;
+		    vertical-align: middle;
+		}
+
+		.empty-state {
+		    text-align: center;
+		    padding: 30px;
+		    color: #64748b;
+		}
+		
+		/* ===== PRODUCT HEADER ===== */
+		.product-header {
+		    margin-bottom: 35px;
+		}
+
+		.header-actions {
+		    display: flex;
+		    align-items: center;
+		    gap: 14px;
+		}
+
+		/* Primary Button */
+		.primary-btn {
+		    background-color: #0b1b34;
+		    color: white;
+		    padding: 12px 22px;
+		    border-radius: 8px;
+		    text-decoration: none;
+		    font-size: 14px;
+		    font-weight: 600;
+		    transition: 0.2s ease;
+		}
+
+		.primary-btn:hover {
+		    background-color: #132a50;
+		}
+		
+		/* ===== HEADER ACTION BUTTONS ===== */
+
+		.header-actions {
+		    display: flex;
+		    align-items: center;
+		    gap: 14px;
+		}
+
+		.primary-btn {
+		    display: inline-flex;
+		    align-items: center;
+		    gap: 8px;
+		    background-color: #0b1b34;
+		    color: white;
+		    padding: 10px 18px;
+		    border-radius: 8px;
+		    font-size: 14px;
+		    font-weight: 600;
+		    text-decoration: none;
+		    border: none;
+		    cursor: pointer;
+		    transition: 0.2s ease;
+		}
+
+		.primary-btn:hover {
+		    background-color: #132a50;
+		}
+
+		.danger-btn {
+		    display: inline-flex;
+		    align-items: center;
+		    gap: 8px;
+		    background-color: #dc2626;
+		    color: white;
+		    padding: 10px 18px;
+		    border-radius: 8px;
+		    font-size: 14px;
+		    font-weight: 600;
+		    border: none;
+		    cursor: pointer;
+		    transition: 0.2s ease;
+		}
+
+		.danger-btn:hover {
+		    background-color: #b91c1c;
+		}
+
+		/* Delete Button */
+		.danger-btn {
+		    background-color: #b91c1c;
+		    padding: 12px 20px;
+		}
+
+		.danger-btn:hover {
+		    background-color: #991b1b;
+		}
+		
+		/* ===== HEADER ACTION BUTTONS ===== */
+
+		.header-actions {
+		    display: flex;
+		    align-items: center;
+		    gap: 14px;
+		}
+
+		.primary-btn {
+		    display: inline-flex;
+		    align-items: center;
+		    gap: 8px;
+		    background-color: #0b1b34;
+		    color: white;
+		    padding: 10px 18px;
+		    border-radius: 8px;
+		    font-size: 14px;
+		    font-weight: 600;
+		    text-decoration: none;
+		    border: none;
+		    cursor: pointer;
+		    transition: 0.2s ease;
+		}
+
+		.primary-btn:hover {
+		    background-color: #132a50;
+		}
+
+		.danger-btn {
+		    display: inline-flex;
+		    align-items: center;
+		    gap: 8px;
+		    background-color: #dc2626;
+		    color: white;
+		    padding: 10px 18px;
+		    border-radius: 8px;
+		    font-size: 14px;
+		    font-weight: 600;
+		    border: none;
+		    cursor: pointer;
+		    transition: 0.2s ease;
+		}
+
+		.danger-btn:hover {
+		    background-color: #b91c1c;
+		}
+
+		/* ===== CARD POLISH ===== */
+		.product-card {
+		    padding: 30px 35px;
+		}
+
+		/* ===== TABLE ===== */
+		.product-table {
+		    width: 100%;
+		    border-collapse: collapse;
+		}
+
+		.product-table thead {
+		    background-color: #0b1b34;
+		    color: white;
+		}
+
+		.product-table th {
+		    padding: 16px 18px;
+		    font-size: 14px;
+		    text-align: left;
+		    letter-spacing: 0.3px;
+		}
+
+		.product-table td {
+		    padding: 18px;
+		    font-size: 14px;
+		    border-bottom: 1px solid #e5e7eb;
+		}
+
+		.product-table tbody tr:hover {
+		    background-color: #f1f5f9;
+		}
+
+		/* Checkbox column */
+		.checkbox-col {
+		    width: 50px;
+		}
+
+		/* Actions column */
+		.actions-col {
+		    width: 120px;
+		}
+
+		/* Edit icon */
+		.icon-btn {
+		    background-color: #0b1b34;
+		    color: white;
+		    width: 36px;
+		    height: 36px;
+		    display: inline-flex;
+		    align-items: center;
+		    justify-content: center;
+		    border-radius: 8px;
+		    text-decoration: none;
+		    transition: 0.2s ease;
+		    padding: 0;              /* remove uneven padding */
+		}
+
+		.icon-btn:hover {
+		    background-color: #132a50;
+		}
+
+		/* Empty state */
+		.empty-state {
+		    text-align: center;
+		    padding: 40px;
+		    color: #64748b;
+		    font-size: 15px;
+		}
+		
+		/* ===== FORM POLISH ===== */
+
+		/* ============================= */
+		/* FORM STRUCTURE */
+		/* ============================= */
+
+		.form-wrapper {
+		    max-width: 950px;
+		    margin: 0 auto;
+		    padding: 40px 45px;
+		}
+
+		.form-section {
+		    margin-bottom: 45px;
+		}
+
+		.section-title {
+		    font-size: 16px;
+		    font-weight: 600;
+		    margin-bottom: 20px;
+		    color: #1e293b;
+		    border-bottom: 1px solid #e5e7eb;
+		    padding-bottom: 8px;
+		}
+
+		.form-row {
+		    display: flex;
+		    gap: 30px;
+		    margin-bottom: 25px;
+		}
+
+		.form-field {
+		    flex: 1;
+		    display: flex;
+		    flex-direction: column;
+		}
+
+		.form-field label {
+		    font-size: 13px;
+		    font-weight: 600;
+		    margin-bottom: 8px;
+		    color: #334155;
+		}
+
+		.form-field input,
+		.form-field textarea {
+		    padding: 12px 14px;
+		    border-radius: 8px;
+		    border: 1px solid #d1d5db;
+		    font-size: 14px;
+		    background-color: #f9fafb;
+		    transition: 0.2s ease;
+		}
+
+		.form-field input:focus,
+		.form-field textarea:focus {
+		    border-color: #0b1b34;
+		    background-color: white;
+		    outline: none;
+		    box-shadow: 0 0 0 3px rgba(11,27,52,0.08);
+		}
+
+		.form-field textarea {
+		    min-height: 90px;
+		    resize: vertical;
+		}
+
+		.full-width {
+		    flex: 1 1 100%;
+		}
+
+		.checkbox-field {
+		    margin-top: 10px;
+		}
+
+		.checkbox-label {
+		    display: flex;
+		    align-items: center;
+		    gap: 10px;
+		    font-weight: 500;
+		    cursor: pointer;
+		}
+
+		.form-actions {
+		    margin-top: 30px;
+		    display: flex;
+		    justify-content: flex-end;
+		}
+		
+		/* ===== Actions Column Improvements ===== */
+
+		.action-buttons {
+		    display: flex;
+		    align-items: center;
+		    gap: 12px;
+		}
+
+		.scan-form {
+		    margin: 0;
+		}
+
+		.hidden-file-input {
+		    display: none;
+		}
+		
+		/* ===== Fix Actions Column Alignment ===== */
+
+		.actions-col {
+		    width: 160px;              /* control column width */
+		    text-align: right;         /* align icons to right */
+		    padding-right: 20px;       /* consistent spacing */
+		}
+
+		.action-buttons {
+		    display: flex;
+		    justify-content: flex-end; /* push icons to right */
+		    align-items: center;
+		    gap: 8px;                  /* reduce spacing */
+		}
+		
+		/* ===== Vulnerability Table ===== */
+
+		.styled-table {
+		    width: 100%;
+		    border-collapse: collapse;
+		    margin-top: 20px;
+		}
+
+		.styled-table thead {
+		    background-color: #0b1b34;
+		    color: white;
+		}
+
+		.styled-table th,
+		.styled-table td {
+		    padding: 14px 16px;
+		    text-align: left;
+		    font-size: 14px;
+		}
+
+		.styled-table tbody tr {
+		    border-bottom: 1px solid #e0e0e0;
+		}
+
+		.styled-table tbody tr:hover {
+		    background-color: #f5f7fa;
+		}
+
+		/* ===== Severity Badges ===== */
+
+		.severity-badge {
+		    padding: 6px 12px;
+		    border-radius: 20px;
+		    font-size: 12px;
+		    font-weight: 600;
+		    display: inline-block;
+		}
+
+		.severity-badge.critical {
+		    background-color: #ff4d4f;
+		    color: white;
+		}
+
+		.severity-badge.high {
+		    background-color: #fa8c16;
+		    color: white;
+		}
+
+		.severity-badge.medium {
+		    background-color: #fadb14;
+		    color: black;
+		}
+
+		.severity-badge.low {
+		    background-color: #52c41a;
+		    color: white;
+		}
+		
+		/* ===== DASHBOARD ENTERPRISE HEADER ===== */
+
+		.dashboard-header {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    margin-bottom: 30px;
+		}
+
+		.header-left h2 {
+		    font-size: 22px;
+		    font-weight: 600;
+		    color: #1e293b;
+		}
+
+		.header-right {
+		    display: flex;
+		    align-items: center;
+		    gap: 14px;
+		}
+
+		.product-dropdown {
+		    padding: 9px 14px;
+		    border-radius: 8px;
+		    border: 1px solid #d1d5db;
+		    font-size: 14px;
+		    min-width: 200px;
+		    background-color: white;
+		    transition: 0.2s ease;
+		}
+
+		.product-dropdown:focus {
+		    border-color: #0b1b34;
+		    outline: none;
+		}
+
+		.view-details-btn {
+		    background-color: #0b1b34;
+		    color: white;
+		    padding: 9px 16px;
+		    border-radius: 8px;
+		    text-decoration: none;
+		    font-size: 14px;
+		    font-weight: 600;
+		    transition: 0.2s ease;
+		}
+
+		.view-details-btn:hover {
+		    background-color: #132a50;
+		}
+
+
+		/* ===== SUMMARY CARD POLISH ===== */
+
+		.summary-card {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		}
+
+		.summary-card h3 {
+		    font-size: 16px;
+		    color: #334155;
+		}
+
+		.metric {
+		    font-size: 26px;
+		    font-weight: 700;
+		    color: #1e293b;
+		}
+
+		.metric.danger {
+		    color: #b91c1c;
+		}
+
+		.metric.safe {
+		    color: #166534;
+		}
+        
+		.data-table {
+		    width: 100%;
+		    border-collapse: collapse;
+		}
+
+		.data-table th,
+		.data-table td {
+		    padding: 12px;
+		    border-bottom: 1px solid #e0e0e0;
+		    text-align: left;
+		}
+
+		.badge {
+		    padding: 6px 10px;
+		    border-radius: 20px;
+		    font-size: 12px;
+		    font-weight: bold;
+		    color: white;
+		}
+
+		.badge.critical {
+		    background-color: #e74c3c;
+		}
+
+		.badge.high {
+		    background-color: #e67e22;
+		}
+
+		.badge.medium {
+		    background-color: #f1c40f;
+		    color: black;
+		}
+
+		.badge.low {
+		    background-color: #2ecc71;
+		}
+
+		.card {
+		    background: white;
+		    padding: 20px;
+		    border-radius: 10px;
+		    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+		}
+		
+		/* Filter Bar Styling */
+		.filter-bar {
+		    margin-bottom: 20px;
+		    display: flex;
+		    align-items: center;
+		}
+
+		.filter-group {
+		    display: flex;
+		    flex-direction: column;
+		}
+
+		.filter-group label {
+		    font-size: 14px;
+		    font-weight: 600;
+		    margin-bottom: 6px;
+		    color: #555;
+		}
+
+		.filter-group select {
+		    min-width: 220px;
+		    padding: 8px 12px;
+		    border-radius: 6px;
+		    border: 1px solid #dcdcdc;
+		    font-size: 14px;
+		    background-color: #fff;
+		    cursor: pointer;
+		    transition: all 0.2s ease-in-out;
+		}
+
+		.filter-group select:hover {
+		    border-color: #999;
+		}
+
+		.filter-group select:focus {
+		    outline: none;
+		    border-color: #2c7be5;
+		    box-shadow: 0 0 0 2px rgba(44,123,229,0.15);
+		}
+		
+		/* Header wrapper */
+		.page-header-wrapper {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    margin-bottom: 20px;
+		}
+
+		/* ============================= */
+		/* PAGE HEADER AREA */
+		/* ============================= */
+
+		.page-header-wrapper {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    margin-bottom: 25px;
+		    padding: 18px 22px;
+		    background: linear-gradient(135deg, #f8f9fc, #eef1f6);
+		    border-radius: 12px;
+		    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+		}
+
+		.page-header-wrapper h2 {
+		    margin: 0;
+		    font-size: 22px;
+		    font-weight: 600;
+		    color: #1f2937;
+		}
+
+		/* ============================= */
+		/* DROPDOWN STYLE */
+		/* ============================= */
+
+		.filter-form select {
+		    padding: 10px 16px;
+		    border-radius: 8px;
+		    border: 1px solid #d0d5dd;
+		    font-size: 14px;
+		    font-weight: 500;
+		    min-width: 200px;
+		    background-color: #ffffff;
+		    cursor: pointer;
+		    transition: all 0.25s ease;
+		    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+		}
+
+		.filter-form select:hover {
+		    border-color: #3b82f6;
+		}
+
+		.filter-form select:focus {
+		    outline: none;
+		    border-color: #2563eb;
+		    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+		}
+
+		/* ============================= */
+		/* CARD IMPROVEMENT */
+		/* ============================= */
+
+		.card {
+		    background: #ffffff;
+		    padding: 22px;
+		    border-radius: 14px;
+		    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+		}
+
+		/* ============================= */
+		/* TABLE IMPROVEMENT */
+		/* ============================= */
+
+		/* ============================= */
+		/* GLOBAL APP DROPDOWN STYLE */
+		/* ============================= */
+
+		.app-dropdown {
+		    padding: 10px 16px;
+		    border-radius: 8px;
+		    border: 1px solid #d0d5dd;
+		    font-size: 14px;
+		    font-weight: 500;
+		    min-width: 200px;
+		    background-color: #ffffff;
+		    cursor: pointer;
+		    transition: all 0.25s ease;
+		    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+		}
+
+		.app-dropdown:hover {
+		    border-color: #3b82f6;
+		}
+
+		.app-dropdown:focus {
+		    outline: none;
+		    border-color: #2563eb;
+		    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+		}
+		
+
+		/* ===== Severity Left Border Highlight ===== */
+
+		.severity-row {
+		    border-left: 6px solid transparent;
+		}
+
+		.severity-row.critical {
+		    border-left-color: #dc2626;
+		}
+
+		.severity-row.high {
+		    border-left-color: #ea580c;
+		}
+
+		.severity-row.medium {
+		    border-left-color: #d97706;
+		}
+
+		.severity-row.low {
+		    border-left-color: #16a34a;
+		}
+
+		/* ===== CVE Link Styling ===== */
+
+		.cve-link {
+		    color: #2563eb;
+		    font-weight: 500;
+		    text-decoration: none;
+		}
+
+		.cve-link:hover {
+		    text-decoration: underline;
+		}
+
+		/* ===== Status Badge ===== */
+
+		.status-badge {
+		    padding: 6px 10px;
+		    border-radius: 20px;
+		    font-size: 12px;
+		    font-weight: 600;
+		    background-color: #e5e7eb;
+		    color: #111827;
+		}
+
+		/* Optional hover highlight */
+		.data-table tr:hover {
+		    background-color: #f9fafb;
+		}
+		
+		.patch-btn {
+		    background-color: #2563eb;
+		    color: white;
+		    border: none;
+		    padding: 5px 10px;
+		    border-radius: 6px;
+		    font-size: 12px;
+		    cursor: pointer;
+		    transition: 0.2s ease;
+		}
+
+		.patch-btn:hover {
+		    background-color: #1e40af;
+		}
+		
+		.status-badge.open {
+		    background-color: #fee2e2;
+		    color: #991b1b;
+		}
+
+		.status-badge.resolved {
+		    background-color: #dcfce7;
+		    color: #166534;
+		}
+
+		.status-badge.inprogress {
+		    background-color: #fef9c3;
+		    color: #854d0e;
+		}
+		
+		
+		
+    </style>
+</head>
+
+<body>
+
+<div class="topbar">
+    Mini Hacksaw Security Dashboard
+</div>
+
+<div class="sidebar">
+
+    <a th:href="@{/}"
+       th:classappend="${currentPath == '/' ? 'active' : ''}">
+        Dashboard
+    </a>
+
+    <a th:href="@{/violations}"
+       th:classappend="${currentPath != null and currentPath.startsWith('/violations') ? 'active' : ''}">
+        Code Violations
+    </a>
+
+    <a th:href="@{/components}"
+       th:classappend="${currentPath != null and currentPath.startsWith('/components') ? 'active' : ''}">
+        Vulnerable Components
+    </a>
+
+    <a th:href="@{/misconfigurations}"
+       th:classappend="${currentPath != null and currentPath.startsWith('/misconfigurations') ? 'active' : ''}">
+        Misconfigurations
+    </a>
+
+    <a th:href="@{/secrets}"
+       th:classappend="${currentPath != null and currentPath.startsWith('/secrets') ? 'active' : ''}">
+        Hardcoded Secrets
+    </a>
+
+    <a th:href="@{/builds}"
+       th:classappend="${currentPath != null and currentPath.startsWith('/builds') ? 'active' : ''}">
+        Build History
+    </a>
+
+    <a th:href="@{/products}"
+       th:classappend="${currentPath != null and currentPath.startsWith('/products') ? 'active' : ''}">
+        Settings
+    </a>
+
+</div>
+
+<div class="content">
+    <div th:replace="${content}"></div>
+</div>
+
+</body>
+</html>

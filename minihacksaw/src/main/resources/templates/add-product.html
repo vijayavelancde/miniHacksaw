@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::body})">
+
+<body>
+
+<div class="page-header">
+    <h2>Add Product</h2>
+</div>
+
+<div class="card form-wrapper">
+	
+	<div th:if="${errorMessage}"
+	     style="background:#ffe6e6;
+	            color:#cc0000;
+	            padding:12px;
+	            border-radius:6px;
+	            margin-bottom:15px;
+	            font-weight:500;">
+	    <span th:text="${errorMessage}"></span>
+	</div>
+
+<form th:action="@{/products/save}" 
+      method="post"
+      enctype="multipart/form-data"
+      th:object="${product}">
+
+    <!-- Hidden ID field -->
+    <input type="hidden" th:field="*{productId}" />
+
+    <!-- BASIC INFO -->
+    <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label>Product Name</label>
+                <input type="text" name="name"
+                       th:value="${product.name}" required>
+            </div>
+
+            <div class="form-field">
+                <label>Brand</label>
+                <input type="text" name="brand"
+                       th:value="${product.brand}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label>Product Type</label>
+                <input type="text" name="productType"
+                       th:value="${product.productType}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-field full-width">
+                <label>Description</label>
+                <textarea name="description"
+                          th:text="${product.description}"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- BUILD INFO -->
+    <div class="form-section">
+        <h3 class="section-title">Build Configuration</h3>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label>Build Format</label>
+                <input type="text" name="buildFormat"
+                       th:value="${product.buildFormat}">
+            </div>
+
+            <div class="form-field">
+                <label>Binary Name</label>
+                <input type="text" name="binaryName"
+                       th:value="${product.binaryName}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label>Languages</label>
+                <input type="text" name="languages"
+                       th:value="${product.languages}">
+            </div>
+
+            <div class="form-field">
+                <label>Upload Build File</label>
+
+                <!-- SHOW EXISTING FILE WHEN EDITING -->
+                <div th:if="${product.buildFileName != null}"
+                     style="margin-bottom:8px; font-size:13px; color:#475569;">
+                    Current File:
+                    <strong th:text="${product.buildFileName}"></strong>
+                </div>
+
+                <input type="file"
+                       name="buildFile"
+                       th:required="${product.productId == null}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-field checkbox-field">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="wafEnabled"
+                           th:checked="${product.wafEnabled}">
+                    Enable WAF Protection
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="primary-btn">
+            Save Product
+        </button>
+    </div>
+
+</form>
+
+</div>
+
+</body>
+</html>

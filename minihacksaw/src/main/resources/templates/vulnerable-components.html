@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::body})">
+
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="page-header-wrapper">
+
+    <h2>Vulnerable Components</h2>
+
+    <form method="get"
+          th:action="@{/components}"
+          class="filter-form"
+          style="display:flex; gap:12px; align-items:center;">
+
+        <!-- Product Filter -->
+        <select name="productId"
+                class="app-dropdown"
+                onchange="this.form.submit()">
+
+            <option value=""
+                    th:selected="${selectedProduct == null or selectedProduct == ''}">
+                Select Product
+            </option>
+
+            <option th:each="p : ${products}"
+                    th:value="${p.productId}"
+                    th:text="${p.name}"
+                    th:selected="${selectedProduct == p.productId}">
+            </option>
+
+        </select>
+
+        <!-- Severity Filter -->
+        <select name="severity"
+                class="app-dropdown"
+                onchange="this.form.submit()">
+
+            <option value=""
+                    th:selected="${selectedSeverity == null or selectedSeverity == ''}">
+                All Severity
+            </option>
+
+            <option value="CRITICAL"
+                    th:selected="${selectedSeverity == 'CRITICAL'}">
+                Critical
+            </option>
+
+            <option value="HIGH"
+                    th:selected="${selectedSeverity == 'HIGH'}">
+                High
+            </option>
+
+            <option value="MEDIUM"
+                    th:selected="${selectedSeverity == 'MEDIUM'}">
+                Medium
+            </option>
+
+            <option value="LOW"
+                    th:selected="${selectedSeverity == 'LOW'}">
+                Low
+            </option>
+
+        </select>
+
+        <!-- Status Filter -->
+        <select name="status"
+                class="app-dropdown"
+                onchange="this.form.submit()">
+
+            <option value=""
+                    th:selected="${selectedStatus == null or selectedStatus == ''}">
+                All Status
+            </option>
+
+            <option value="OPEN"
+                    th:selected="${selectedStatus == 'OPEN'}">
+                Open
+            </option>
+
+            <option value="RESOLVED"
+                    th:selected="${selectedStatus == 'RESOLVED'}">
+                Resolved
+            </option>
+
+        </select>
+
+    </form>
+
+</div>
+
+
+<!-- ===== COMPONENT TABLE ===== -->
+<div class="card">
+
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>Dependency</th>
+            <th>Current Version</th>
+            <th>CVE</th>
+            <th>Severity</th>
+            <th>Fix Version</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <!-- No Products -->
+        <tr th:if="${#lists.isEmpty(products)}">
+            <td colspan="6" style="text-align:center; padding:30px; color:#64748b;">
+                No products available. Please add a product first.
+            </td>
+        </tr>
+
+        <!-- No Components -->
+        <tr th:if="${!#lists.isEmpty(products) and #lists.isEmpty(components)}">
+            <td colspan="6" style="text-align:center; padding:30px; color:#64748b;">
+                No vulnerable components found.
+            </td>
+        </tr>
+
+        <!-- Component Rows -->
+        <tr th:each="c : ${components}"
+            th:class="'severity-row ' + ${c.severity.toLowerCase()}">
+
+            <td th:text="${c.dependencyName}"></td>
+
+            <td th:text="${c.currentVersion}"></td>
+
+            <td>
+                <a th:href="'https://nvd.nist.gov/vuln/detail/' + ${c.cveId}"
+                   target="_blank"
+                   class="cve-link"
+                   th:text="${c.cveId}">
+                </a>
+            </td>
+
+            <td>
+                <span class="badge"
+                      th:classappend="' ' + ${c.severity.toLowerCase()}"
+                      th:text="${c.severity}">
+                </span>
+            </td>
+
+            <td th:text="${c.fixVersion}"></td>
+
+            <td style="display:flex; flex-direction:column; gap:6px;">
+
+                <!-- Status Badge -->
+                <span class="status-badge"
+                      th:classappend="' ' + ${c.status.toLowerCase()}"
+                      th:text="${c.status}">
+                </span>
+
+                <!-- Patch Button -->
+                <div th:if="${#strings.equalsIgnoreCase(c.status,'OPEN')}">
+
+                    <form method="post"
+                          th:action="@{/components/patch}"
+                          style="margin:0;">
+
+                        <input type="hidden"
+                               name="productId"
+                               th:value="${selectedProduct}" />
+
+                        <input type="hidden"
+                               name="cveId"
+                               th:value="${c.cveId}" />
+
+                        <button type="submit"
+                                class="patch-btn">
+                            Patch
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

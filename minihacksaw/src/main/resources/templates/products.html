@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/layout :: layout(~{::body})">
+
+<body>
+
+<div class="page-header-wrapper">
+
+    <h2>Registered Products</h2>
+
+    <div class="header-actions">
+
+        <a th:href="@{/products/create}" class="primary-btn">
+            <i class="fa-solid fa-plus"></i>
+            Onboard Product
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="card product-card">
+
+    <table class="product-table">
+
+        <thead>
+            <tr>
+                <th class="checkbox-col">
+                    <input type="checkbox" id="selectAll">
+                </th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th class="actions-col">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr th:each="product : ${products}">
+
+                <td class="checkbox-col">
+                    <input type="checkbox" class="productCheckbox">
+                </td>
+
+                <td th:text="${product.productId}"
+                    style="font-family:monospace;"></td>
+
+                <td th:text="${product.name}"></td>
+
+                <td>
+                    <span class="status-badge"
+                          th:classappend="${product.scanStatus == 'FAILED'} ? ' status-failed'
+                                        : ${product.scanStatus == 'SAFE'} ? ' status-safe'
+                                        : ' status-pending'"
+                          th:text="${product.scanStatus}">
+                    </span>
+                </td>
+
+                <td class="actions-col">
+
+                    <div class="action-buttons">
+
+                        <!-- Edit -->
+                        <a th:href="@{'/products/edit/' + ${product.productId}}"
+                           class="icon-btn"
+                           title="Edit Product">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+
+                        <!-- Build History -->
+                        <a th:href="@{'/builds?product=' + ${product.name}}"
+                           class="icon-btn"
+                           title="Build History">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </a>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(products)}">
+                <td colspan="5" class="empty-state">
+                    No products registered yet.
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+</body>
+</html>
